@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "npm run test:lint",
+    "test:lint": "eslint server agent"
   },
   "repository": {
     "type": "git",
@@ -16,5 +17,9 @@
   "bugs": {
     "url": "https://github.com/WIVSW/simple-ci/issues"
   },
-  "homepage": "https://github.com/WIVSW/simple-ci#readme"
+  "homepage": "https://github.com/WIVSW/simple-ci#readme",
+  "devDependencies": {
+    "eslint": "^6.5.1",
+    "eslint-config-google": "^0.14.0"
+  }
 }
