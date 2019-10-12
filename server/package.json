@@ -1,0 +1,14 @@
+{
+  "name": "simple-ci_server",
+  "version": "1.0.0",
+  "description": "The root ci server",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "author": "WIVSW",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.17.1"
+  }
+}
