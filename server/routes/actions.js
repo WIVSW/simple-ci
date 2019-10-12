@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const Agent = require('../models/agent');
 
 const allowCors = require('../middleware/allow-cors');
 
