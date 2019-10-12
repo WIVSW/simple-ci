@@ -13,8 +13,23 @@ const TEST_BUILDS = [
 	},
 ];
 
-const renderBuildRow = ({id, status}) => {
+const TEST_OUT = `
+Тестовый текст
+с переносами строк      и с пробелами
+
+
+Интересно как это будет работать.
+`;
+
+const TEST_BUILD = {
+	id: 666,
+	status: 1,
+	out: TEST_OUT,
+};
+
+const parseStatus = (status) => {
 	let text;
+
 	switch (status) {
 	case 1:
 		text = 'Успешно';
@@ -26,10 +41,14 @@ const renderBuildRow = ({id, status}) => {
 		text = 'Ожидание';
 	}
 
+	return text;
+};
+
+const renderBuildRow = ({id, status}) => {
 	return `
 		<tr>
 			<td>${id}</td>
-			<td>${text}</td>
+			<td>${parseStatus(status)}</td>
 			<td><a href="/build/${id}">Подробнее</a></td>
 		</tr>
 	`;
@@ -48,6 +67,15 @@ const renderIndexPage = (builds = TEST_BUILDS) => {
 	`;
 };
 
+const renderBuildPage = ({id, status, out} = TEST_BUILD) => {
+	return `
+		<h1>Сборка #${id}</h1>
+		<p>Статус: ${parseStatus(status)}</p>
+		<div style="white-space: pre;">${out}</div>
+`;
+};
+
 module.exports = {
 	renderIndexPage,
+	renderBuildPage,
 };
