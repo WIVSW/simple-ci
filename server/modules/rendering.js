@@ -62,7 +62,7 @@ const renderIndexPage = (builds = TEST_BUILDS) => {
 				<td>Статус</td>
 				<td></td>
 			</tr>
-			${builds.length ? builds.map((a) => renderBuildRow(a)).join('') : ''}
+			${builds.length ? builds.map(renderBuildRow).join('') : ''}
 		</table>
 	`;
 };

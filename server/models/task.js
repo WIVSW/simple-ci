@@ -2,30 +2,56 @@
  */
 class Task {
 	/**
-	 * @param {string} url
-	 * @param {string} hash
-	 * @param {string} command
+	 * @param {number} id
+	 * @param {string=} url
+	 * @param {string=} hash
+	 * @param {string=} command
 	 */
-	constructor(url, hash, command) {
+	constructor(id, url, hash, command) {
 		/**
-		 * @type {string}
+		 * @type {number}
 		 */
-		this.url = url;
+		this.id = id;
 
 		/**
 		 * @type {string}
 		 */
-		this.hash = hash;
+		this.url = url || null;
 
 		/**
 		 * @type {string}
 		 */
-		this.command = command;
+		this.hash = hash || null;
+
+		/**
+		 * @type {string}
+		 */
+		this.command = command || null;
+
+		/**
+		 * @type {number}
+		 */
+		this.status = -1;
+
+		/**
+		 * @type {string}
+		 */
+		this.out = '';
 
 		/**
 		 * Last modified
 		 * @type {number}
 		 */
+		this.timestamp = Date.now();
+	}
+
+	/**
+	 * @param {boolean} status
+	 * @param {string} out
+	 */
+	markAsExecuted(status, out) {
+		this.status = Number(status);
+		this.out = out;
 		this.timestamp = Date.now();
 	}
 

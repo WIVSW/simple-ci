@@ -1,25 +1,28 @@
-const fs = require('fs');
-const path = require('path');
-
 const express = require('express');
 const router = express.Router();
 
-const Task = require('../models/task');
+const deps = {
+	engine: null,
+};
 
-router.get('/run', (req, res) => {
+router.get('/run', async (req, res) => {
 	const {url, hash, command} = req.query;
 
-	const task = new Task(url, hash, command);
-
-	if (!task.isValid()) {
+	try {
+		await deps.engine.addTask(url, hash, command);
+		res.redirect('/');
+	} catch (e) {
 		res
 			.status(400)
 			.send('Произошла ошибка! Проверьте введенные данные.');
 	}
-
-	res
-		.status(200)
-		.send('Ok');
 });
 
-module.exports = router;
+/**
+ * @param {Engine} engine
+ * @return {Router}
+ */
+module.exports = ({engine}) => {
+	deps.engine = engine;
+	return router;
+};
