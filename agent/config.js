@@ -1,5 +1,4 @@
 const argv = require('yargs').parse();
-console.log(process.argv);
 
 const DEFAULT_CONFIG = {
 	host: 'localhost',
@@ -16,10 +15,16 @@ if (process.env.PORT) {
 	envConfig.port = process.env.PORT;
 }
 
+if (process.env.SERVER_URL) {
+	envConfig.serverUrl = process.env.SERVER_URL;
+}
+
 let config = {};
 
 try {
+	const serverConfig = require('../config').server;
 	config = require('../config').agent;
+	config.serverUrl = `http://${serverConfig.host}:${serverConfig.port}`;
 } catch (e) {}
 
 const argsConfig = {};
@@ -32,12 +37,9 @@ if (argv.port) {
 	argsConfig.port = argv.port;
 }
 
-console.log(
-	DEFAULT_CONFIG,
-	config,
-	envConfig,
-	argsConfig
-)
+if (argv.serverUrl) {
+	argsConfig.serverUrl = argv.serverUrl;
+}
 
 module.exports = Object.assign(
 	{},
