@@ -1,4 +1,5 @@
 const Task = require('../models/task');
+const Agent = require('../models/agent');
 
 /**
  */
@@ -42,6 +43,22 @@ class Engine {
 		 * @private
 		 */
 		this._mapIdToTask = {};
+
+		/**
+		 * @type {Object<string, Agent>}
+		 * @private
+		 */
+		this._agents = {};
+	}
+
+	/**
+	 * @param {string} host
+	 * @param {string} port
+	 */
+	registerAgent(host, port) {
+		const agent = new Agent(host, port);
+		this._agents[agent.url] = agent;
+		this._recycle();
 	}
 
 	/**
@@ -62,12 +79,13 @@ class Engine {
 	}
 
 	/**
+	 * @param {string} agentUrl
 	 * @param {number} id
 	 * @param {number} exitCode
 	 * @param {string} stdout
 	 * @param {string} stderr
 	 */
-	recieveData(id, exitCode, stdout, stderr) {
+	receiveData(agentUrl, id, exitCode, stdout, stderr) {
 		const status = exitCode === 0;
 		const out = status ? stdout : stderr;
 		const taskIndex = this._pendings.findIndex((task) => task.id === id);
@@ -78,11 +96,17 @@ class Engine {
 			this._pendings.splice(taskIndex, 1);
 		} else {
 			task = new Task(id);
+			this._cacheTask(task);
 		}
 
 		task.markAsExecuted(status, out);
 
 		this._done.push(task);
+		const agent = this._getAgentByUrl(agentUrl);
+
+		if (agent) {
+			agent.stopTask(task.id);
+		}
 
 		this._recycle();
 	}
@@ -100,8 +124,74 @@ class Engine {
 		}
 
 		this._queue.push(task);
+		this._cacheTask(task);
 		this._recycle();
 	}
+
+	/**
+	 * Stop when queue is empty or
+	 * all Agents is busy
+	 * @return {Promise<void>}
+	 * @private
+	 */
+	async _recycle() {
+		if (!this._queue.length) {
+			return;
+		}
+
+		if (!this._recyclePromise) {
+			const task = this._queue[0];
+			this._recyclePromise = this
+				._execute(task)
+				.then(() => {
+					this._pendings.push(task);
+					this._queue.splice(0, 1);
+				})
+				.finally(() => {
+					this._recyclePromise = null;
+				})
+				.then(() => this._recycle())
+				.catch(() => {
+					console.log('Every agent is busy or no agents exist');
+				});
+		}
+
+		return await this._recyclePromise;
+	}
+
+	/**
+	 * @param {Task} task
+	 * @return {Promise<void>}
+	 * @private
+	 */
+	_execute(task) {
+		const sortedAgents = Object
+			.values(this._agents)
+			.filter(Boolean)
+			.sort((a, b) => a.tasks.length - b.tasks.length);
+
+		const send = (agents) => new Promise((resolve, reject) => {
+			if (!agents.length) {
+				reject(new Error('No agents to send data'));
+			}
+
+			const agent = agents[0];
+
+			return this
+				._sendTaskToAgent(task, agent)
+				.then(() => agent.startTask(task.id))
+				.catch(() => send(agents.slice(1)));
+		});
+
+		return send(sortedAgents);
+	}
+
+	/**
+	 * @param {Task} task
+	 * @param {Agent} agent
+	 * @private
+	 */
+	_sendTaskToAgent(task, agent) {}
 
 	/**
 	 * @param {Task} task
@@ -109,6 +199,15 @@ class Engine {
 	 */
 	_cacheTask(task) {
 		this._mapIdToTask[task.id] = task;
+	}
+
+	/**
+	 * @param {string} url
+	 * @return {?Agent}
+	 * @private
+	 */
+	_getAgentByUrl(url) {
+		return this._agents[url] || null;
 	}
 }
 
