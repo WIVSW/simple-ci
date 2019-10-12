@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Builds</title>
+</head>
+<body>
+	<h1>Добавить сборку</h1>
+	<form action="/run" method="get">
+		<label for="url">Адрес репозитория</label><br>
+		<input type="text" id="url" name="url" required><br><br>
+		<label for="hash">Хэш коммита для checkout</label><br>
+		<input type="text" id="hash" name="hash" required><br><br>
+		<label for="command">Комманда для сборки</label><br>
+		<input type="text" id="command" name="command" required><br><br>
+		<button type="submit">Собрать</button>
+	</form>
+	<h2>Список сборок</h2>
+	{{content}}
+</body>
+</html>
