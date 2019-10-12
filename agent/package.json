@@ -1,0 +1,15 @@
+{
+  "name": "simple-ci_agent",
+  "version": "1.0.0",
+  "description": "The agent server of simple-ci",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "author": "WIVSW",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.17.1",
+    "yargs": "^14.2.0"
+  }
+}
