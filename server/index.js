@@ -5,7 +5,8 @@ const app = express();
 
 const Engine = require('./modules/engine');
 
-const engine = new Engine({});
+const api = require('./api/api');
+const engine = new Engine(api);
 
 const pagesRoute = require('./routes/pages')({engine});
 const actionsRoute = require('./routes/actions')({engine});

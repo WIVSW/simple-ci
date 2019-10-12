@@ -171,6 +171,7 @@ class Engine {
 			.sort((a, b) => a.tasks.length - b.tasks.length);
 
 		const send = (agents) => new Promise((resolve, reject) => {
+			debugger;
 			if (!agents.length) {
 				reject(new Error('No agents to send data'));
 			}
@@ -189,9 +190,37 @@ class Engine {
 	/**
 	 * @param {Task} task
 	 * @param {Agent} agent
+	 * @return {Promise}
 	 * @private
 	 */
-	_sendTaskToAgent(task, agent) {}
+	_sendTaskToAgent(task, agent) {
+		return this._api.sendTaskToAgent(agent.url, task)
+			.catch((err) => {
+				if (
+					err instanceof Error &&
+					err.code === 'ECONNREFUSED'
+				) {
+					this._onAgentDied(agent);
+				}
+
+				throw err;
+			});
+	}
+
+	/**
+	 * @param {Agent} agent
+	 * @private
+	 */
+	_onAgentDied(agent) {
+		this._pendings.forEach((task, index) => {
+			if (agent.tasks.includes(task.id)) {
+				this._queue.push(task);
+				this._pendings.splice(index, 1);
+			}
+		});
+
+		this._agents[agent.url] = null;
+	}
 
 	/**
 	 * @param {Task} task
