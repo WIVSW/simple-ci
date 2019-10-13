@@ -6,5 +6,6 @@ module.exports = {
 	agent: {
 		host: 'localhost',
 		port: 4600,
+		buildFolder: './tmp',
 	},
 };

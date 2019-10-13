@@ -3,6 +3,7 @@ const argv = require('yargs').parse();
 const DEFAULT_CONFIG = {
 	host: 'localhost',
 	port: 4600,
+	buildFolder: './tmp',
 };
 
 const envConfig = {};
@@ -17,6 +18,10 @@ if (process.env.PORT) {
 
 if (process.env.SERVER_URL) {
 	envConfig.serverUrl = process.env.SERVER_URL;
+}
+
+if (process.env.BUILD_FOLDER) {
+	envConfig.buildFolder = process.env.BUILD_FOLDER;
 }
 
 let config = {};
@@ -39,6 +44,10 @@ if (argv.port) {
 
 if (argv.serverUrl) {
 	argsConfig.serverUrl = argv.serverUrl;
+}
+
+if (argv.buildFolder) {
+	argsConfig.buildFolder = argv.buildFolder;
 }
 
 module.exports = Object.assign(

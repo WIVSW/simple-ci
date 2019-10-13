@@ -2,7 +2,7 @@ const argv = require('yargs').parse();
 
 const DEFAULT_CONFIG = {
 	host: 'localhost',
-	port: 4600,
+	port: 4500,
 };
 
 const envConfig = {};
@@ -18,7 +18,7 @@ if (process.env.PORT) {
 let config = {};
 
 try {
-	config = require('../config').agent;
+	config = require('../config').server;
 } catch (e) {}
 
 const argsConfig = {};
