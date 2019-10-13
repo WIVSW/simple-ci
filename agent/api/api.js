@@ -17,6 +17,10 @@ const sendResult = ({id, exitCode, stdout, stderr}) => deps.fetcher
 		exitCode,
 		stdout,
 		stderr,
+	})
+	.catch((err) => {
+		console.log('Can\'t connect to master server. SHUTDOWN!');
+		process.exit(1);
 	});
 
 module.exports = ({serverUrl, host, port}) => {
