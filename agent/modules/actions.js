@@ -35,11 +35,15 @@ const run = async ({id, url, hash, command}) => {
 	try {
 		await fse.ensureDir(deps.buildFolder);
 		await fse.remove(`${deps.buildFolder}/${id}`);
-		await execute(`git clone ${url} ${id}`, deps.buildFolder);
-		const result = await
+		const cloneResult = await
+		execute(`git clone ${url} ${id}`, deps.buildFolder);
+		const buildResult = await
 		execute(`git checkout ${hash} && ${command}`, repoPath);
 
-		out.stdout += result.stdout + '\n';
+		out.stdout += [cloneResult, buildResult].reduce((out, result) => {
+			const str = result && result.stdout || '';
+			return `${out}${str}\n`;
+		}, '');
 		out.code = 0;
 		console.log(out.stdout);
 	} catch (error) {
