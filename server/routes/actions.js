@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Agent = require('../models/agent');
 
-const allowCors = require('../middleware/allow-cors');
+const allowCors = require('../../common/middleware/allow-cors');
 
 const deps = {
 	engine: null,

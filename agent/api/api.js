@@ -11,12 +11,13 @@ const register = () => deps.fetcher.post('/notify_agent', {
 	post: deps.port,
 });
 
-const sendResult = ({id, exitCode, stdout, stderr}) => deps.fetcher.post('/notify_build_result', {
-	id,
-	exitCode,
-	stdout,
-	stderr,
-});
+const sendResult = ({id, exitCode, stdout, stderr}) => deps.fetcher
+	.post('/notify_build_result', {
+		id,
+		exitCode,
+		stdout,
+		stderr,
+	});
 
 module.exports = ({serverUrl, host, port}) => {
 	deps.host = host;

@@ -1,4 +1,4 @@
-const Task = require('../models/task');
+const Task = require('../../common/models/task');
 const Agent = require('../models/agent');
 
 /**
@@ -8,6 +8,11 @@ class Engine {
 	 * @param {Object} api
 	 */
 	constructor(api) {
+		/**
+		 * @const {number}
+		 */
+		this.MAX_PENDING_INTERVAL = 60 * 1000;
+
 		/**
 		 * @type {Object}
 		 * @private
@@ -49,6 +54,8 @@ class Engine {
 		 * @private
 		 */
 		this._agents = {};
+
+		setInterval(() => this._recyclePendings(), 2 * 60 * 1000);
 	}
 
 	/**
@@ -129,6 +136,30 @@ class Engine {
 	}
 
 	/**
+	 *
+	 * @private
+	 */
+	_recyclePendings() {
+		const map = this._pendings
+			.filter((task) => task.timestamp >= this.MAX_PENDING_INTERVAL)
+			.reduce((a, b) => {
+				a[b.id] = b;
+			}, {});
+
+		const ids = Object.keys(map).map(Number);
+		Object
+			.keys(this._agents)
+			.forEach((agent) => {
+				ids.forEach((id) => {
+					if (agent.tasks.includes(id)) {
+						const task = map[id];
+						this._sendTaskToAgent(task, agent);
+					}
+				});
+			});
+	}
+
+	/**
 	 * Stop when queue is empty or
 	 * all Agents is busy
 	 * @return {Promise<void>}
@@ -171,7 +202,6 @@ class Engine {
 			.sort((a, b) => a.tasks.length - b.tasks.length);
 
 		const send = (agents) => new Promise((resolve, reject) => {
-			debugger;
 			if (!agents.length) {
 				reject(new Error('No agents to send data'));
 			}
