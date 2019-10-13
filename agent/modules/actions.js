@@ -1,8 +1,6 @@
 const {promisify} = require('util');
 const path = require('path');
 const fse = require('fs-extra');
-const {spawn} = require('child_process');
-const readline = require('readline');
 const exec = promisify(require('child_process').exec);
 
 const deps = {
