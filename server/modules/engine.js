@@ -179,13 +179,13 @@ class Engine {
 					this._pendings.push(task);
 					this._queue.splice(0, 1);
 				})
+				.catch(() => {
+					console.log('Every agent is busy or no agents exist');
+				})
 				.finally(() => {
 					this._recyclePromise = null;
 				})
-				.then(() => this._recycle())
-				.catch(() => {
-					console.log('Every agent is busy or no agents exist');
-				});
+				.then(() => this._recycle());
 		}
 
 		return await this._recyclePromise;
@@ -202,9 +202,9 @@ class Engine {
 			.filter(Boolean)
 			.sort((a, b) => a.tasks.length - b.tasks.length);
 
-		const send = (agents) => new Promise((resolve, reject) => {
+		const send = (agents) => {
 			if (!agents.length) {
-				reject(new Error('No agents to send data'));
+				Promise.reject(new Error('No agents to send data'));
 			}
 
 			const agent = agents[0];
@@ -213,7 +213,7 @@ class Engine {
 				._sendTaskToAgent(task, agent)
 				.then(() => agent.startTask(task.id))
 				.catch(() => send(agents.slice(1)));
-		});
+		};
 
 		return send(sortedAgents);
 	}
