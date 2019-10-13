@@ -164,8 +164,8 @@ class Engine {
 
 		mapIdToAgent
 			.forEach(({id, agent}) => {
-				console.log('Recycle', task.id);
 				const task = map[id];
+				console.log('Recycle', task.id);
 				if (agent) {
 					this._sendTaskToAgent(task, agent);
 				} else {
@@ -206,13 +206,13 @@ class Engine {
 					this._pendings.push(task);
 					this._queue.splice(0, 1);
 				})
-				.catch(() => {
-					console.log('Every agent is busy or no agents exist');
-				})
 				.finally(() => {
 					this._recyclePromise = null;
 				})
-				.then(() => this._recycle());
+				.then(() => this._recycle())
+				.catch(() => {
+					console.log('Every agent is busy or no agents exist');
+				});
 		}
 
 		return await this._recyclePromise;
