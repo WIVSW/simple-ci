@@ -9,12 +9,15 @@ const fetcher = axios.create({
  * @param {Task} task
  * @return {Promise}
  */
-const sendTaskToAgent = (agentUrl, task) => fetcher.post(`${agentUrl}build`, {
-	id: task.id,
-	url: task.url,
-	hash: task.hash,
-	command: task.command,
-});
+const sendTaskToAgent = (agentUrl, task) => {
+	console.log('Send task', task.id, 'to', agentUrl);
+	return fetcher.post(`${agentUrl}build`, {
+		id: task.id,
+		url: task.url,
+		hash: task.hash,
+		command: task.command,
+	});
+}
 
 module.exports = {
 	sendTaskToAgent,

@@ -3,12 +3,25 @@
 class Engine {
 	/**
 	 * @param {Object} api
+	 * @param {Object} actions
 	 */
-	constructor(api) {
+	constructor(api, actions) {
 		/**
 		 * @const {number}
 		 */
 		this.MAX_QUEUE_SIZE = 10;
+
+		/**
+		 * @type {Object}
+		 * @private
+		 */
+		this._api = api;
+
+		/**
+		 * @type {Object}
+		 * @private
+		 */
+		this._actions = actions;
 
 		/**
 		 * @type {Array<Task>}
@@ -21,6 +34,12 @@ class Engine {
 		 * @private
 		 */
 		this._promises = {};
+
+		/**
+		 * @type {Array<Object>}
+		 * @private
+		 */
+		this._done = [];
 	}
 
 	/**
@@ -73,7 +92,7 @@ class Engine {
 
 		console.log('Finish task', task.id);
 
-		const index = this._queue.findIndex(task.id);
+		const index = this._queue.findIndex(({id}) => task.id === id);
 		this._queue.splice(index, 1);
 		this._done.push({
 			id: task.id,
@@ -125,7 +144,7 @@ class Engine {
 		this._sendReports();
 
 		const notExecingTask = this
-			._queue.find((task) => this._promises[task.id]);
+			._queue.find((task) => !this._promises[task.id]);
 
 		if (!notExecingTask) {
 			return Promise.resolve();

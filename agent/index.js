@@ -1,4 +1,4 @@
-const {host, port, serverUrl} = require('./config');
+const {host, port, serverUrl, buildFolder} = require('./config');
 const express = require('express');
 const app = express();
 const Task = require('../common/models/task');
@@ -10,8 +10,9 @@ if (!serverUrl) {
 }
 
 const api = require('./api/api')({serverUrl, host, port});
+const actions = require('./modules/actions')({buildFolder});
 const Engine = require('./modules/engine');
-const engine = new Engine(api);
+const engine = new Engine(api, actions);
 
 app.use(express.json());
 

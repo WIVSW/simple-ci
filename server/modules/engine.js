@@ -65,6 +65,7 @@ class Engine {
 	registerAgent(host, port) {
 		const agent = new Agent(host, port);
 		this._agents[agent.url] = agent;
+		console.log('Register new agent', agent.url);
 		this._recycle();
 	}
 

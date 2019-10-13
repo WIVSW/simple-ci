@@ -8,7 +8,7 @@ const deps = {
 
 const register = () => deps.fetcher.post('/notify_agent', {
 	host: deps.host,
-	post: deps.port,
+	port: deps.port,
 });
 
 const sendResult = ({id, exitCode, stdout, stderr}) => deps.fetcher

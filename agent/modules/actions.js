@@ -1,49 +1,20 @@
+const {promisify} = require('util');
 const path = require('path');
 const fse = require('fs-extra');
 const {spawn} = require('child_process');
 const readline = require('readline');
+const exec = promisify(require('child_process').exec);
 
 const deps = {
 	buildFolder: null,
 };
 
-const spawnCmd = async (cmd, cwd) => {
-	return new Promise((resolve, reject) => {
-		let out = '';
-		const child = spawn(cmd, args, {
-			cwd,
-		});
-
-		const r1 = readline.createInterface({
-			input: child.stdout,
-			terminal: false,
-		});
-
-		r1.on('line', (line) => {
-			out = `${out}${line}\n`;
-		});
-
-		child.on('error', (error) => {
-			reject(error);
-		});
-
-		child.on('close', (code) => {
-			resolve({
-				code,
-				stdout: code === 0 ? out : '',
-				stderr: code !== 0 ? out : '',
-			});
-		});
-	});
-};
-
 const execute = async (cmd, cwd) => {
-	const {code, stdout, stderr} = await spawnCmd(cmd, cwd);
-	if (code === 0) {
-		return stdout;
-	} else {
-		throw stderr;
-	}
+	return await exec(
+		cmd, {
+			cwd,
+		}
+	);
 };
 
 /**
@@ -53,15 +24,31 @@ const execute = async (cmd, cwd) => {
  * @param {string} command
  */
 const run = async ({id, url, hash, command}) => {
+	const repoPath = path.resolve(deps.buildFolder, `./${id}`);
+
+	const out = {
+		code: null,
+		stdout: '',
+		stderr: '',
+	};
+
 	await fse.ensureDir(deps.buildFolder);
 	await execute(`git clone ${url} ${id}`, deps.buildFolder);
-	const result = await spawnCmd(
-		`git checkout ${hash} && ${command}`,
-		path.resolve(deps.buildFolder, `./${id}`)
-	);
+	try {
+		const result = await
+		execute(`git checkout ${hash} && ${command}`, repoPath);
+
+		out.stdout += result.stdout + '\n';
+		out.code = 0;
+		console.log(out.stdout);
+	} catch (error) {
+		out.code = error.status;
+		out.stderr += error.stderr + '\n';
+		console.log(out.stderr);
+	}
 	await fse.remove(`${deps.buildFolder}/${id}`);
 
-	return result;
+	return out;
 };
 
 module.exports = ({buildFolder}) => {
