@@ -55,7 +55,7 @@ class Engine {
 		 */
 		this._agents = {};
 
-		setInterval(() => this._recyclePendings(), 2 * 60 * 1000);
+		setInterval(() => this._recyclePendings(), this.MAX_PENDING_INTERVAL);
 	}
 
 	/**
@@ -145,18 +145,45 @@ class Engine {
 			.filter((task) => task.timestamp >= this.MAX_PENDING_INTERVAL)
 			.reduce((a, b) => {
 				a[b.id] = b;
+				return a;
 			}, {});
 
 		const ids = Object.keys(map).map(Number);
-		Object
-			.keys(this._agents)
-			.forEach((agent) => {
-				ids.forEach((id) => {
-					if (agent.tasks.includes(id)) {
-						const task = map[id];
-						this._sendTaskToAgent(task, agent);
+		const mapIdToAgent = ids.map((id) => {
+			const agent = Object
+				.values(this._agents)
+				.find((ag) => {
+					return Boolean(ag) &&
+						ag.tasks.includes(id);
+				}) || null;
+			return {
+				id,
+				agent,
+			};
+		});
+
+		mapIdToAgent
+			.forEach(({id, agent}) => {
+				console.log('Recycle', task.id);
+				const task = map[id];
+				if (agent) {
+					this._sendTaskToAgent(task, agent);
+				} else {
+					const pendinIndex = this._pendings
+						.findIndex((t) => t.id === id);
+					const queueIndex = this._queue
+						.findIndex((t) => t.id === id);
+
+					if (pendinIndex !== -1) {
+						this._pendings.splice(pendinIndex, 1);
 					}
-				});
+
+					if (queueIndex === -1) {
+						this._queue.push(task);
+					}
+
+					this._recycle();
+				}
 			});
 	}
 
@@ -251,6 +278,7 @@ class Engine {
 		});
 
 		this._agents[agent.url] = null;
+		this._recycle();
 	}
 
 	/**

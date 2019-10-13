@@ -32,9 +32,10 @@ const run = async ({id, url, hash, command}) => {
 		stderr: '',
 	};
 
-	await fse.ensureDir(deps.buildFolder);
-	await execute(`git clone ${url} ${id}`, deps.buildFolder);
 	try {
+		await fse.ensureDir(deps.buildFolder);
+		await fse.remove(`${deps.buildFolder}/${id}`);
+		await execute(`git clone ${url} ${id}`, deps.buildFolder);
 		const result = await
 		execute(`git checkout ${hash} && ${command}`, repoPath);
 
